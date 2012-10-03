@@ -6,16 +6,28 @@ import scala.math.sqrt
 import scala.math.pow
 import java.io.File
 import weka.filters.Filter
+import java.util.Random
+import weka.core.Instances
 
 object Main {
-	def main(args: Array[String]) {
+	val help = "Syntax: " + 
+	           "<program> <CSV file> <# of bins>\n\n" + 
+	           "<CSV file> must be formatted with the names of the " +
+	           "sample attributes\nas the first row. The last column is " +
+	           "expected to be a numeric attribute\nthat will be " +
+	           "divided into <# of bins> approximately equally-sized bins.\n" +
+	           "These bins will be used as classes for the samples from " +
+	           "<CSV file>."
+	
+	//val trials = 300
+	
+	def main(args: Array[String]) = {
 		val (filename, classCount) = try {
 			(args(0), args(1).toInt)
 		} catch {
-			case _: NumberFormatException | _: ArrayIndexOutOfBoundsException => {
-				println("Syntax:")
-				println(if (args.length > 0) args(0) else "<program name>" +
-				    " <CSV file> <number of bins to discretize class>")
+			case _: NumberFormatException|_: ArrayIndexOutOfBoundsException => {
+				println(help)
+				println
 				sys.exit()
 			}
 		}
@@ -24,26 +36,51 @@ object Main {
 		val loader = new CSVLoader
 		loader.setSource(new File(filename))
 		val data = loader.getDataSet()
-
-		// Filter data
+		
+		/* Stuff for testing for the best number of bins
+		 * val errors = for (i <- 0 until trials) yield {
+			data.randomize(new Random)
+			buildTree(data, classCount)._2
+		}
+		val mean = errors.sum / trials
+		val stdDev =
+		  sqrt((for (error <- errors) yield pow(mean - error,2)).sum
+		      / (trials-1)) 
+		println(mean.toString + "," + stdDev.toString )*/
+		
+		val (tree, error) =
+		  (for (i <- 0 until 10) yield {
+			data.randomize(new Random)
+			buildTree(data, classCount)
+		   }).minBy(_._2)
+		
+		println(tree)
+		println("RMS error: " + error.toString)
+	}
+	
+	def buildTree(data: Instances, classCount: Int) = {
+		val classCol = data.numAttributes
+		
+		// Discretize data
+		data.setClassIndex(-1) // If there is a class, then this fails
 		val filter = new Discretize
 		filter.setBins(classCount)
 		filter.setUseEqualFrequency(true)
-		filter.setAttributeIndices("9")
+		filter.setAttributeIndices( classCol toString )
 		filter.setInputFormat(data)
 
 		val newData = Filter.useFilter(data, filter)
 
 		// If we set a class for the data before filtering, the filtering won't
 		// work
-		data.setClassIndex(8)
+		data.setClassIndex(classCol-1)
 
 		// We are classifying on column 9, age, which we just discretized
-		newData.setClassIndex(8)
+		newData.setClassIndex(classCol-1)
 
 		// Learn from data
 		val resultingTrees =
-			for (i <- 0 to 10) yield {
+			for (i <- 0 until 1) yield {
 				val tree = new J48
 				tree.setReducedErrorPruning(true)
 				tree.buildClassifier(newData.trainCV(10, i))
@@ -71,7 +108,7 @@ object Main {
 
 		// Evaluate results
 		val rmsErrors =
-			for (i <- 0 until 10) yield {
+			for (i <- 0 until 1) yield {
 				val testSet = newData.testCV(10, i)
 				val rawTestSet = data.testCV(10, i)
 				// Calculate the root-mean-square of test set #i
@@ -96,9 +133,6 @@ object Main {
 			}
 
 		// Find the most accurate tree and tell the world
-		val (bestTree, bestError) = resultingTrees zip rmsErrors minBy(_._2)
-		println("Best tree:")
-		println(bestTree)
-		println("RMS Error: " + bestError toString)
+		resultingTrees zip rmsErrors minBy(_._2)
 	}
 }
