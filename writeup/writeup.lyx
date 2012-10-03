@@ -1,0 +1,6293 @@
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
+\begin_document
+\begin_header
+\textclass article
+\begin_preamble
+
+\end_preamble
+\use_default_options false
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman lmodern
+\font_sans lmss
+\font_typewriter lmtt
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize letterpaper
+\use_geometry false
+\use_amsmath 1
+\use_esint 1
+\use_mhchem 1
+\use_mathdots 1
+\cite_engine basic
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\use_refstyle 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 1in
+\topmargin 1in
+\rightmargin 1in
+\bottommargin 1in
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Machine Learning: Decision Trees
+\end_layout
+
+\begin_layout Author
+Thomas Kelly
+\end_layout
+
+\begin_layout Section*
+Downloads
+\end_layout
+
+\begin_layout Itemize
+\begin_inset CommandInset href
+LatexCommand href
+name "Sources"
+target "cs773c-decision-trees.tar.bz2"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset CommandInset href
+LatexCommand href
+name "Data"
+target "abalone.csv"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset CommandInset href
+LatexCommand href
+name "JAR Executable"
+target "cs773c-decision-trees-assembly-0.1-SNAPSHOT.jar"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section*
+Algorithm & Analysis
+\end_layout
+
+\begin_layout Standard
+I analyzed the abalone data using decision trees built using 
+\begin_inset CommandInset href
+LatexCommand href
+name "Weka"
+target "www.cs.waikato.ac.nz/ml/weka/"
+
+\end_inset
+
+'s implementation of C4.5, with the intent of being able to predict the number
+ of rings on an abalone shell from other characteristics, given 
+\begin_inset CommandInset href
+LatexCommand href
+name "data from the University of California, Irvine"
+target "http://archive.ics.uci.edu/ml/datasets/Abalone"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Decision trees yield discrete values, not numbers.
+ So, in order to train the tree, I algorithmically binned the ring counts
+ such that each bin had an approximately equal number of samples.
+\end_layout
+
+\begin_layout Standard
+Since the number of rings is a fundamentally numeric attribute, I concluded
+ that root-mean-square error (RMS error) was the best method for calculating
+ accuracy.
+ However, a decision tree cannot give the numeric values necessary for such
+ a metric.
+ Therefore, in order to test accuracy on each decision tree, I converted
+ the bins back into numbers by considering a classification of a sample
+ into an interval as the midpoint of the interval.
+ If either bound of the interval was infinite, I used the other bound instead.
+ So, if a sample had 8 rings and was classified as having a number of rings
+ in [8.5, 9.5), the predicted number of rings would be considered to be 9;
+ thus, there would be an error of -1.
+ This would be squared and averaged with other such squared errors, and
+ the total error would be the square root of that.
+\end_layout
+
+\begin_layout Standard
+Training and testing was done by training on a random 90% of the data and
+ testing on the remaining 10%.
+ This may be iterated an arbitrary number of times to yield different, possibly
+ better, trees.
+ While training, I allowed the decision tree engine (J48) to prune to reduce
+ error.
+ This seems to have worked.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float table
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Results of testing 300 iterations of training and testing with random sets
+ with a 90/10 split
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="26" columns="3">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+Bins
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+Average RMS Error
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+Sample Standard Deviation
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+2
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+3.2332093745
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+0.1682421685
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+3
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+2.8625707597
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+0.1583609278
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+4
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+2.6012545937
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+0.1620899615
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+2.6085169047
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+0.1643659917
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+6
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+2.5476391545
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+0.1246571898
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+7
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+2.5285629343
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+0.1523100806
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+8
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+2.4876458462
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+0.1415066316
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+9
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+2.5328953833
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+0.1478735303
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+10
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+2.5850855382
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+0.1539681321
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+11
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+2.6385904281
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+0.1512146224
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+12
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+2.6373574411
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+0.1419340222
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+13
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+2.6834302081
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+0.1811795605
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+14
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+2.6658865147
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+0.1590587788
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+15
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+2.6636347945
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+0.1725667781
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+16
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+2.6488776422
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+0.161201125
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+17
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+2.6486083691
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+0.1829259814
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+18
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+2.6226892908
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+0.1777683565
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+19
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+2.6352686808
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+0.1581677756
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+20
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+2.6458737015
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+0.1672765751
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+21
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+2.6156310484
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+0.1524668947
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+22
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+2.6376640876
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+0.1518566427
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+23
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+2.636344432
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+0.1606466731
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+24
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+2.6257048279
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+0.1413820279
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+25
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+2.6366155277
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+0.1659916566
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+26
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+2.6103144413
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+0.1660024481
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+In order to maximize performance, I searched for the number of bins that
+ would, yield the least error averaged over multiple iterations of training
+ and testing.
+ In order to do this, I first ran a small (20) number of iterations with
+ each of the possible number of bins.
+ The difference between the error of the best (8 bins) and second best (6
+ bins) was ~0.03, while the sample standard deviation was near 0.14.
+ In order to get means that could be statistically distinguished with over
+ 99.7% confidence, I needed to have enough samples that the standard deviation
+ of the means was less than one third of difference the two lowest means.
+ Since the standard deviation of the mean is the sample standard deviation
+ divided by the square root of the number of samples, the number of required
+ observations was the solution to 
+\begin_inset Formula $\frac{0.14}{\sqrt{N}}<\frac{0.03}{3}$
+\end_inset
+
+, that is, 196.
+ However, I did the math wrong, but that was okay, as I decided to use 300
+ trials, which was better.
+ Doing 300 iterations resulted in Table 1, wherein it can be seen that 8
+ is the best number of bins.
+ As such, it can be stated with better than 0.9999999 confidence that this
+ is the best value.
+\end_layout
+
+\begin_layout Section*
+Results
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "basicstyle={\footnotesize\ttfamily}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+shell weight <= 0.1435
+\end_layout
+
+\begin_layout Plain Layout
+
+|   diameter <= 0.22: '(-inf-6.5]' (132.0/15.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   diameter > 0.22
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   sex = M
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   shell weight <= 0.056: '(-inf-6.5]' (12.0/8.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   shell weight > 0.056
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   shucked weight <= 0.1705
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   diameter <= 0.325
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   height <= 0.115
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   whole weight <= 0.1855: '(7.5-8.5]' (6.0/4.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   whole weight > 0.1855
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   length <= 0.335: '(6.5-7.5]' (3.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   length > 0.335
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   shell weight <= 0.0755
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   shucked weight <= 0.082: '(8.5-9.5]'
+ (7.0/2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   shucked weight > 0.082: '(-inf-6.5]'
+ (9.0/5.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   shell weight > 0.0755
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   height <= 0.1
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   diameter <= 0.275: '(6.5-7.5]'
+ (3.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   diameter > 0.275
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   | shell weight <= 0.1435
+\end_layout
+
+\begin_layout Plain Layout
+
+|   diameter <= 0.22: '(-inf-6.5]' (132.0/15.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   diameter > 0.22
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   sex = M
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   shell weight <= 0.056: '(-inf-6.5]' (12.0/8.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   shell weight > 0.056
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   shucked weight <= 0.1705
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   diameter <= 0.325
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   height <= 0.115
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   whole weight <= 0.1855: '(7.5-8.5]' (6.0/4.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   whole weight > 0.1855
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   length <= 0.335: '(6.5-7.5]' (3.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   length > 0.335
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   shell weight <= 0.0755
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   shucked weight <= 0.082: '(8.5-9.5]'
+ (7.0/2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   shucked weight > 0.082: '(-inf-6.5]'
+ (9.0/5.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   shell weight > 0.0755
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   height <= 0.1
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   diameter <= 0.275: '(6.5-7.5]'
+ (3.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   diameter > 0.275
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   length <= 0.41: '(8.5-9.5]'
+ (6.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   length > 0.41: '(6.5-7.5]'
+ (4.0/2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   height > 0.1: '(7.5-8.5]' (4.0/2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   height > 0.115: '(8.5-9.5]' (6.0/4.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   diameter > 0.325: '(8.5-9.5]' (8.0/4.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   shucked weight > 0.1705: '(7.5-8.5]' (35.0/20.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   sex = F
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   diameter <= 0.295
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   shell weight <= 0.073: '(-inf-6.5]' (10.0/6.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   shell weight > 0.073
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   shucked weight <= 0.1075: '(9.5-10.5]' (4.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   shucked weight > 0.1075: '(6.5-7.5]' (3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   diameter > 0.295
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   shucked weight <= 0.194
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   shell weight <= 0.0985
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   viscera weight <= 0.057: '(7.5-8.5]' (2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   viscera weight > 0.057: '(11.5-13.5]' (5.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   shell weight > 0.0985
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   length <= 0.42: '(9.5-10.5]' (14.0/9.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   length > 0.42
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   shucked weight <= 0.1565: '(7.5-8.5]' (11.0/8.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   shucked weight > 0.1565
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   length <= 0.45
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   shell weight <= 0.1295: '(8.5-9.5]' (6.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   shell weight > 0.1295: '(10.5-11.5]' (6.0/3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   length > 0.45: '(7.5-8.5]' (6.0/3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   shucked weight > 0.194
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   viscera weight <= 0.1185: '(-inf-6.5]' (10.0/5.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   viscera weight > 0.1185: '(9.5-10.5]' (4.0/2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   sex = I
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   shell weight <= 0.0705
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   shucked weight <= 0.0635
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   shell weight <= 0.052: '(-inf-6.5]' (21.0/11.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   shell weight > 0.052
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   whole weight <= 0.167: '(7.5-8.5]' (3.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   whole weight > 0.167: '(6.5-7.5]' (2.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   shucked weight > 0.0635
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   viscera weight <= 0.033: '(-inf-6.5]' (15.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   viscera weight > 0.033
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   shell weight <= 0.0605
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   length <= 0.3: '(-inf-6.5]' (2.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   length > 0.3
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   diameter <= 0.25: '(6.5-7.5]' (16.0/6.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   diameter > 0.25
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   shell weight <= 0.06
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   whole weight <= 0.1925: '(-inf-6.5]'
+ (10.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   whole weight > 0.1925
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   length <= 0.335: '(6.5-7.5]' (2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   length > 0.335: '(-inf-6.5]' (11.0/2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   shell weight > 0.06: '(6.5-7.5]' (3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   shell weight > 0.0605: '(-inf-6.5]' (47.0/23.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   shell weight > 0.0705
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   diameter <= 0.275
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   diameter <= 0.245: '(-inf-6.5]' (3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   diameter > 0.245
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   diameter <= 0.27: '(6.5-7.5]' (8.0/4.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   diameter > 0.27
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   length <= 0.365: '(6.5-7.5]' (2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   length > 0.365: '(-inf-6.5]' (5.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   diameter > 0.275
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   viscera weight <= 0.1155
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   shell weight <= 0.119
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   shell weight <= 0.11
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   diameter <= 0.285
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   diameter <= 0.28: '(7.5-8.5]' (5.0/3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   diameter > 0.28: '(6.5-7.5]' (7.0/2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   diameter > 0.285
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   whole weight <= 0.258: '(6.5-7.5]' (9.0/4.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   whole weight > 0.258
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   height <= 0.115
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   shell weight <= 0.0945
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   whole weight <= 0.347
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   height <= 0.1
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   height <= 0.095
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   |   height <= 0.085:
+ '(6.5-7.5]' (3.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   |   height > 0.085
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   length <=
+ 0.42: '(-inf-6.5]' (20.0/11.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   length >
+ 0.42: '(6.5-7.5]' (2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   height > 0.095
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   |   diameter <=
+ 0.305: '(6.5-7.5]' (7.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   |   diameter > 0.305:
+ '(-inf-6.5]' (4.0/2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   height > 0.1
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   length <= 0.395:
+ '(7.5-8.5]' (4.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   length > 0.395: '(-inf-6.5
+]' (5.0/2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   whole weight > 0.347: '(-inf-6.5]'
+ (7.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   shell weight > 0.0945
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   shucked weight <= 0.124:
+ '(8.5-9.5]' (5.0/3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   shucked weight > 0.124
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   shucked weight <= 0.227
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   diameter <= 0.33
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   |   height <= 0.09:
+ '(6.5-7.5]' (5.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   |   height > 0.09
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   whole weight
+ <= 0.4075
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   diameter
+ <= 0.315: '(7.5-8.5]' (9.0/5.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   diameter
+ > 0.315
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |  
+ height <= 0.1: '(6.5-7.5]' (6.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |  
+ height > 0.1
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |  
+ |   shucked weight <= 0.171: '(7.5-8.5]' (12.0/7.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |  
+ |   shucked weight > 0.171: '(6.5-7.5]' (4.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   whole weight
+ > 0.4075: '(-inf-6.5]' (3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   diameter > 0.33
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   |   length <= 0.44:
+ '(6.5-7.5]' (5.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   |   length > 0.44:
+ '(7.5-8.5]' (7.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   shucked weight > 0.227:
+ '(-inf-6.5]' (3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   height > 0.115
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   viscera weight <= 0.069: '(7.5-8.5]'
+ (2.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   viscera weight > 0.069: '(6.5-7.5]'
+ (5.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   shell weight > 0.11
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   height <= 0.11
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   diameter <= 0.34
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   diameter <= 0.335: '(6.5-7.5]' (11.0/4.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   diameter > 0.335: '(7.5-8.5]' (2.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   diameter > 0.34: '(6.5-7.5]' (6.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   height > 0.11: '(-inf-6.5]' (7.0/4.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   shell weight > 0.119: '(7.5-8.5]' (62.0/35.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   viscera weight > 0.1155
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   height <= 0.105: '(-inf-6.5]' (4.0/3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   height > 0.105: '(7.5-8.5]' (13.0/9.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+shell weight > 0.1435
+\end_layout
+
+\begin_layout Plain Layout
+
+|   shell weight <= 0.2895
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   shell weight <= 0.2335
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   shucked weight <= 0.3345
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   sex = M
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   shell weight <= 0.182
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   diameter <= 0.36: '(10.5-11.5]' (20.0/14.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   diameter > 0.36
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   height <= 0.135
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   length <= 0.46: '(9.5-10.5]' (5.0/2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   length > 0.46
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   shell weight <= 0.1785
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   viscera weight <= 0.102: '(7.5-8.5]'
+ (5.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   viscera weight > 0.102
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   length <= 0.515
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   height <= 0.125
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   length <= 0.495
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   height <= 0.12: '(7.5-8.5]'
+ (4.0/2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   height > 0.12: '(8.5-9.5]'
+ (3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   length > 0.495: '(8.5-9.5]'
+ (9.0/2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   height > 0.125: '(9.5-10.5]'
+ (9.0/6.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   length > 0.515: '(7.5-8.5]' (7.0/3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   shell weight > 0.1785: '(6.5-7.5]' (4.0/2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   height > 0.135: '(8.5-9.5]' (4.0/2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   shell weight > 0.182
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   length <= 0.505
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   length <= 0.46: '(8.5-9.5]' (8.0/4.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   length > 0.46
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   length <= 0.485: '(9.5-10.5]' (8.0/5.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   length > 0.485: '(13.5-inf)' (19.0/12.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   length > 0.505: '(9.5-10.5]' (20.0/13.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   sex = F
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   diameter <= 0.325: '(6.5-7.5]' (3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   diameter > 0.325
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   viscera weight <= 0.1105: '(9.5-10.5]' (20.0/15.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   viscera weight > 0.1105
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   shell weight <= 0.2245
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   height <= 0.115: '(8.5-9.5]' (9.0/5.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   height > 0.115
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   height <= 0.165
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   diameter <= 0.415: '(9.5-10.5]' (72.0/56.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   diameter > 0.415: '(7.5-8.5]' (12.0/6.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   height > 0.165: '(10.5-11.5]' (4.0/2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   shell weight > 0.2245: '(11.5-13.5]' (8.0/3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   sex = I
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   whole weight <= 0.6255
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   length <= 0.45: '(11.5-13.5]' (7.0/5.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   length > 0.45
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   shucked weight <= 0.2455
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   height <= 0.115: '(7.5-8.5]' (20.0/10.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   height > 0.115
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   height <= 0.125
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   height <= 0.12: '(7.5-8.5]' (12.0/7.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   height > 0.12
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   shucked weight <= 0.2275: '(7.5-8.5]'
+ (6.0/2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   shucked weight > 0.2275
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   viscera weight <= 0.1185:
+ '(8.5-9.5]' (5.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   viscera weight > 0.1185:
+ '(7.5-8.5]' (3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   height > 0.125
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   diameter <= 0.39
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   diameter <= 0.375
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   diameter <= 0.36: '(8.5-9.5]'
+ (3.0/2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   diameter > 0.36
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   length <= 0.49: '(7.5-8.5]'
+ (2.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   length > 0.49: '(8.5-9.5]'
+ (2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   diameter > 0.375: '(7.5-8.5]' (9.0/5.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   diameter > 0.39
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   diameter <= 0.4: '(8.5-9.5]' (4.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   diameter > 0.4: '(10.5-11.5]' (4.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   shucked weight > 0.2455
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   shell weight <= 0.194: '(7.5-8.5]' (42.0/18.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   shell weight > 0.194: '(8.5-9.5]' (2.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   whole weight > 0.6255
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   shucked weight <= 0.276
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   shucked weight <= 0.2635: '(9.5-10.5]' (3.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   shucked weight > 0.2635
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   length <= 0.535: '(11.5-13.5]' (4.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   length > 0.535: '(8.5-9.5]' (2.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   shucked weight > 0.276
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   height <= 0.135
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   height <= 0.125: '(8.5-9.5]' (6.0/3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   height > 0.125
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   height <= 0.13: '(7.5-8.5]' (5.0/2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   height > 0.13: '(8.5-9.5]' (7.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   height > 0.135
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   length <= 0.55
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   length <= 0.53: '(7.5-8.5]' (6.0/3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   length > 0.53: '(9.5-10.5]' (6.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   length > 0.55: '(8.5-9.5]' (4.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   shucked weight > 0.3345
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   sex = M
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   shell weight <= 0.229: '(8.5-9.5]' (52.0/34.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   shell weight > 0.229: '(7.5-8.5]' (5.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   sex = F
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   diameter <= 0.465
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   height <= 0.165
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   shucked weight <= 0.389
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   viscera weight <= 0.1965: '(8.5-9.5]' (8.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   viscera weight > 0.1965: '(7.5-8.5]' (3.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   shucked weight > 0.389
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   diameter <= 0.425
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   height <= 0.135: '(7.5-8.5]' (7.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   height > 0.135
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   height <= 0.145: '(9.5-10.5]' (3.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   height > 0.145: '(7.5-8.5]' (2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   diameter > 0.425: '(7.5-8.5]' (17.0/9.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   height > 0.165: '(-inf-6.5]' (2.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   diameter > 0.465: '(9.5-10.5]' (2.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   sex = I
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   diameter <= 0.445: '(7.5-8.5]' (25.0/11.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   diameter > 0.445
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   viscera weight <= 0.1755: '(9.5-10.5]' (3.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   viscera weight > 0.1755: '(8.5-9.5]' (2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   shell weight > 0.2335
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   shucked weight <= 0.379
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   length <= 0.53: '(13.5-inf)' (62.0/35.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   length > 0.53
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   viscera weight <= 0.1485
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   whole weight <= 0.7265: '(8.5-9.5]' (4.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   whole weight > 0.7265: '(9.5-10.5]' (12.0/3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   viscera weight > 0.1485
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   viscera weight <= 0.179
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   sex = M
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   length <= 0.56: '(11.5-13.5]' (10.0/2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   length > 0.56
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   height <= 0.15: '(13.5-inf)' (3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   height > 0.15: '(10.5-11.5]' (3.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   sex = F
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   viscera weight <= 0.1625
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   height <= 0.145: '(8.5-9.5]' (3.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   height > 0.145: '(13.5-inf)' (3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   viscera weight > 0.1625
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   whole weight <= 0.8665
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   diameter <= 0.425: '(9.5-10.5]' (2.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   diameter > 0.425
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   whole weight <= 0.84: '(9.5-10.5]'
+ (2.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   whole weight > 0.84: '(11.5-13.5]'
+ (4.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   whole weight > 0.8665: '(13.5-inf)' (2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   sex = I: '(8.5-9.5]' (12.0/8.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   viscera weight > 0.179: '(9.5-10.5]' (56.0/41.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   shucked weight > 0.379
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   shell weight <= 0.239: '(8.5-9.5]' (19.0/6.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   shell weight > 0.239
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   sex = M
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   viscera weight <= 0.286
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   shell weight <= 0.248
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   length <= 0.565: '(8.5-9.5]' (3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   length > 0.565: '(7.5-8.5]' (10.0/4.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   shell weight > 0.248
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   height <= 0.16
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   diameter <= 0.44: '(7.5-8.5]' (13.0/8.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   diameter > 0.44
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   height <= 0.13: '(7.5-8.5]' (4.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   height > 0.13
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   length <= 0.565: '(10.5-11.5]'
+ (4.0/2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   length > 0.565
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   shucked weight <= 0.458
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   shucked weight <= 0.4185:
+ '(9.5-10.5]' (10.0/3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   shucked weight > 0.4185
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   height <= 0.15
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   |   shell weight
+ <= 0.2765: '(8.5-9.5]' (4.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   |   shell weight
+ > 0.2765: '(10.5-11.5]' (2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   height > 0.15: '(10.5-11.5]
+' (3.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   shucked weight > 0.458
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   shucked weight <= 0.4755:
+ '(6.5-7.5]' (3.0/2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   shucked weight > 0.4755
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   whole weight <=
+ 1.189
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   |   diameter <=
+ 0.475: '(8.5-9.5]' (18.0/9.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   |   diameter > 0.475:
+ '(7.5-8.5]' (3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   whole weight > 1.189:
+ '(8.5-9.5]' (5.0/2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   height > 0.16: '(8.5-9.5]' (14.0/6.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   viscera weight > 0.286
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   length <= 0.62: '(9.5-10.5]' (3.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   length > 0.62: '(10.5-11.5]' (2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   sex = F
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   shell weight <= 0.2845
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   viscera weight <= 0.2645
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   whole weight <= 1.0765
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   height <= 0.13: '(10.5-11.5]' (6.0/3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   height > 0.13
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   diameter <= 0.46
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   diameter <= 0.455: '(8.5-9.5]'
+ (24.0/14.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   diameter > 0.455: '(7.5-8.5]' (9.0/4.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   diameter > 0.46
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   height <= 0.16
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   shell weight <= 0.2625: '(10.5-11.5
+]' (3.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   shell weight > 0.2625
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   shucked weight <= 0.4635:
+ '(9.5-10.5]' (4.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   shucked weight > 0.4635:
+ '(10.5-11.5]' (4.0/2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   height > 0.16: '(8.5-9.5]' (3.0/2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   whole weight > 1.0765
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   shucked weight <= 0.534: '(11.5-13.5]'
+ (3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   shucked weight > 0.534: '(7.5-8.5]' (7.0/4.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   viscera weight > 0.2645: '(9.5-10.5]' (4.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   shell weight > 0.2845: '(8.5-9.5]' (16.0/6.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   sex = I: '(8.5-9.5]' (20.0/13.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   shell weight > 0.2895
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   shucked weight <= 0.414
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   length <= 0.495: '(-inf-6.5]' (2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   length > 0.495
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   shell weight <= 0.356
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   length <= 0.57
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   height <= 0.17: '(13.5-inf)' (37.0/17.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   height > 0.17
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   sex = M
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   whole weight <= 0.8855: '(9.5-10.5]' (3.0/2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   whole weight > 0.8855: '(13.5-inf)' (8.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   sex = F: '(13.5-inf)' (4.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   sex = I: '(13.5-inf)' (0.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   length > 0.57: '(13.5-inf)' (50.0/35.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   shell weight > 0.356: '(13.5-inf)' (38.0/9.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   shucked weight > 0.414
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   shell weight <= 0.4095
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   shell weight <= 0.314
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   shell weight <= 0.2905: '(8.5-9.5]' (7.0/2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   shell weight > 0.2905
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   diameter <= 0.44: '(8.5-9.5]' (5.0/2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   diameter > 0.44: '(9.5-10.5]' (91.0/60.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   shell weight > 0.314
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   shucked weight <= 0.5115
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   shell weight <= 0.3775
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   viscera weight <= 0.303
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   shell weight <= 0.32
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   shucked weight <= 0.4995
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   shell weight <= 0.3185
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   length <= 0.605: '(13.5-inf)'
+ (4.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   length > 0.605: '(11.5-13.5]' (8.0/5.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   shell weight > 0.3185: '(11.5-13.5]'
+ (4.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   shucked weight > 0.4995: '(9.5-10.5]' (4.0/2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   shell weight > 0.32
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   shell weight <= 0.3605
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   height <= 0.17
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   shell weight <= 0.3255: '(10.5-11.5]'
+ (7.0/3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   shell weight > 0.3255
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   diameter <= 0.48: '(9.5-10.5]'
+ (14.0/6.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   diameter > 0.48
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   height <= 0.165
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   shell weight <=
+ 0.34: '(13.5-inf)' (8.0/4.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   shell weight > 0.34:
+ '(9.5-10.5]' (19.0/11.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   height > 0.165: '(11.5-13.5]'
+ (6.0/3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   height > 0.17
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   sex = M: '(9.5-10.5]' (4.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   sex = F: '(8.5-9.5]' (11.0/7.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   sex = I: '(9.5-10.5]' (2.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   shell weight > 0.3605: '(9.5-10.5]' (7.0/3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   viscera weight > 0.303: '(13.5-inf)' (5.0/2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   shell weight > 0.3775: '(11.5-13.5]' (10.0/3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   shucked weight > 0.5115
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   shell weight <= 0.3595: '(9.5-10.5]' (111.0/78.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   shell weight > 0.3595
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   shell weight <= 0.36: '(10.5-11.5]' (6.0/2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   shell weight > 0.36
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   sex = M
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   height <= 0.16
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   length <= 0.66: '(8.5-9.5]' (3.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   length > 0.66: '(10.5-11.5]' (3.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   height > 0.16
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   shell weight <= 0.389
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   viscera weight <= 0.22: '(11.5-13.5]'
+ (3.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   viscera weight > 0.22
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   shucked weight <= 0.7425
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   shucked weight <= 0.5455:
+ '(7.5-8.5]' (2.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   shucked weight > 0.5455
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   length <= 0.685
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   |   shell weight
+ <= 0.371: '(9.5-10.5]' (10.0/5.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   |   shell weight
+ > 0.371
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   length <=
+ 0.645: '(9.5-10.5]' (5.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   length >
+ 0.645: '(8.5-9.5]' (6.0/3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   length > 0.685: '(11.5-13.5
+]' (2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   shucked weight > 0.7425:
+ '(10.5-11.5]' (3.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   shell weight > 0.389: '(10.5-11.5]'
+ (24.0/16.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   sex = F: '(10.5-11.5]' (48.0/33.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   sex = I: '(11.5-13.5]' (2.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   shell weight > 0.4095
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   shucked weight <= 0.639
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   viscera weight <= 0.324: '(13.5-inf)' (64.0/24.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   viscera weight > 0.324
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   shell weight <= 0.4645
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   shell weight <= 0.4375: '(9.5-10.5]' (9.0/5.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   shell weight > 0.4375: '(11.5-13.5]' (8.0/2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   shell weight > 0.4645: '(13.5-inf)' (17.0/2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   shucked weight > 0.639
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   height <= 0.22
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   shell weight <= 0.4535: '(10.5-11.5]' (48.0/28.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   shell weight > 0.4535
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   shell weight <= 0.5675
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   sex = M
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   length <= 0.665: '(9.5-10.5]' (5.0/3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   length > 0.665
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   height <= 0.205: '(11.5-13.5]' (25.0/13.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   height > 0.205: '(10.5-11.5]' (8.0/2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   sex = F
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   shucked weight <= 0.7055: '(13.5-inf)'
+ (14.0/7.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   shucked weight > 0.7055
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   height <= 0.18: '(11.5-13.5]' (8.0/5.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   height > 0.18: '(10.5-11.5]' (23.0/11.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   sex = I: '(10.5-11.5]' (0.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   shell weight > 0.5675
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   shucked weight <= 1.109: '(13.5-inf)' (17.0/7.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   shucked weight > 1.109: '(10.5-11.5]' (3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   height > 0.22: '(13.5-inf)' (12.0/4.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+Number of Leaves  : 	225
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+Size of the tree : 	440
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+RMS error: 2.2760979789036715  |   |   |   |   |   |   length <= 0.41: '(8.5-9.5]'
+ (6.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   length > 0.41: '(6.5-7.5]'
+ (4.0/2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   height > 0.1: '(7.5-8.5]' (4.0/2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   height > 0.115: '(8.5-9.5]' (6.0/4.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   diameter > 0.325: '(8.5-9.5]' (8.0/4.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   shucked weight > 0.1705: '(7.5-8.5]' (35.0/20.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   sex = F
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   diameter <= 0.295
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   shell weight <= 0.073: '(-inf-6.5]' (10.0/6.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   shell weight > 0.073
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   shucked weight <= 0.1075: '(9.5-10.5]' (4.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   shucked weight > 0.1075: '(6.5-7.5]' (3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   diameter > 0.295
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   shucked weight <= 0.194
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   shell weight <= 0.0985
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   viscera weight <= 0.057: '(7.5-8.5]' (2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   viscera weight > 0.057: '(11.5-13.5]' (5.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   shell weight > 0.0985
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   length <= 0.42: '(9.5-10.5]' (14.0/9.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   length > 0.42
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   shucked weight <= 0.1565: '(7.5-8.5]' (11.0/8.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   shucked weight > 0.1565
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   length <= 0.45
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   shell weight <= 0.1295: '(8.5-9.5]' (6.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   shell weight > 0.1295: '(10.5-11.5]' (6.0/3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   length > 0.45: '(7.5-8.5]' (6.0/3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   shucked weight > 0.194
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   viscera weight <= 0.1185: '(-inf-6.5]' (10.0/5.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   viscera weight > 0.1185: '(9.5-10.5]' (4.0/2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   sex = I
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   shell weight <= 0.0705
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   shucked weight <= 0.0635
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   shell weight <= 0.052: '(-inf-6.5]' (21.0/11.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   shell weight > 0.052
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   whole weight <= 0.167: '(7.5-8.5]' (3.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   whole weight > 0.167: '(6.5-7.5]' (2.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   shucked weight > 0.0635
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   viscera weight <= 0.033: '(-inf-6.5]' (15.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   viscera weight > 0.033
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   shell weight <= 0.0605
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   length <= 0.3: '(-inf-6.5]' (2.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   length > 0.3
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   diameter <= 0.25: '(6.5-7.5]' (16.0/6.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   diameter > 0.25
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   shell weight <= 0.06
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   whole weight <= 0.1925: '(-inf-6.5]'
+ (10.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   whole weight > 0.1925
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   length <= 0.335: '(6.5-7.5]' (2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   length > 0.335: '(-inf-6.5]' (11.0/2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   shell weight > 0.06: '(6.5-7.5]' (3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   shell weight > 0.0605: '(-inf-6.5]' (47.0/23.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   shell weight > 0.0705
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   diameter <= 0.275
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   diameter <= 0.245: '(-inf-6.5]' (3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   diameter > 0.245
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   diameter <= 0.27: '(6.5-7.5]' (8.0/4.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   diameter > 0.27
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   length <= 0.365: '(6.5-7.5]' (2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   length > 0.365: '(-inf-6.5]' (5.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   diameter > 0.275
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   viscera weight <= 0.1155
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   shell weight <= 0.119
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   shell weight <= 0.11
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   diameter <= 0.285
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   diameter <= 0.28: '(7.5-8.5]' (5.0/3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   diameter > 0.28: '(6.5-7.5]' (7.0/2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   diameter > 0.285
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   whole weight <= 0.258: '(6.5-7.5]' (9.0/4.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   whole weight > 0.258
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   height <= 0.115
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   shell weight <= 0.0945
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   whole weight <= 0.347
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   height <= 0.1
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   height <= 0.095
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   |   height <= 0.085:
+ '(6.5-7.5]' (3.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   |   height > 0.085
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   length <=
+ 0.42: '(-inf-6.5]' (20.0/11.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   length >
+ 0.42: '(6.5-7.5]' (2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   height > 0.095
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   |   diameter <=
+ 0.305: '(6.5-7.5]' (7.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   |   diameter > 0.305:
+ '(-inf-6.5]' (4.0/2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   height > 0.1
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   length <= 0.395:
+ '(7.5-8.5]' (4.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   length > 0.395: '(-inf-6.5
+]' (5.0/2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   whole weight > 0.347: '(-inf-6.5]'
+ (7.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   shell weight > 0.0945
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   shucked weight <= 0.124:
+ '(8.5-9.5]' (5.0/3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   shucked weight > 0.124
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   shucked weight <= 0.227
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   diameter <= 0.33
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   |   height <= 0.09:
+ '(6.5-7.5]' (5.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   |   height > 0.09
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   whole weight
+ <= 0.4075
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   diameter
+ <= 0.315: '(7.5-8.5]' (9.0/5.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   diameter
+ > 0.315
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |  
+ height <= 0.1: '(6.5-7.5]' (6.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |  
+ height > 0.1
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |  
+ |   shucked weight <= 0.171: '(7.5-8.5]' (12.0/7.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |  
+ |   shucked weight > 0.171: '(6.5-7.5]' (4.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   whole weight
+ > 0.4075: '(-inf-6.5]' (3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   diameter > 0.33
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   |   length <= 0.44:
+ '(6.5-7.5]' (5.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   |   length > 0.44:
+ '(7.5-8.5]' (7.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   shucked weight > 0.227:
+ '(-inf-6.5]' (3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   height > 0.115
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   viscera weight <= 0.069: '(7.5-8.5]'
+ (2.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   viscera weight > 0.069: '(6.5-7.5]'
+ (5.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   shell weight > 0.11
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   height <= 0.11
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   diameter <= 0.34
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   diameter <= 0.335: '(6.5-7.5]' (11.0/4.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   diameter > 0.335: '(7.5-8.5]' (2.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   diameter > 0.34: '(6.5-7.5]' (6.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   height > 0.11: '(-inf-6.5]' (7.0/4.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   shell weight > 0.119: '(7.5-8.5]' (62.0/35.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   viscera weight > 0.1155
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   height <= 0.105: '(-inf-6.5]' (4.0/3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   height > 0.105: '(7.5-8.5]' (13.0/9.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+shell weight > 0.1435
+\end_layout
+
+\begin_layout Plain Layout
+
+|   shell weight <= 0.2895
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   shell weight <= 0.2335
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   shucked weight <= 0.3345
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   sex = M
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   shell weight <= 0.182
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   diameter <= 0.36: '(10.5-11.5]' (20.0/14.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   diameter > 0.36
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   height <= 0.135
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   length <= 0.46: '(9.5-10.5]' (5.0/2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   length > 0.46
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   shell weight <= 0.1785
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   viscera weight <= 0.102: '(7.5-8.5]'
+ (5.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   viscera weight > 0.102
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   length <= 0.515
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   height <= 0.125
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   length <= 0.495
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   height <= 0.12: '(7.5-8.5]'
+ (4.0/2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   height > 0.12: '(8.5-9.5]'
+ (3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   length > 0.495: '(8.5-9.5]'
+ (9.0/2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   height > 0.125: '(9.5-10.5]'
+ (9.0/6.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   length > 0.515: '(7.5-8.5]' (7.0/3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   shell weight > 0.1785: '(6.5-7.5]' (4.0/2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   height > 0.135: '(8.5-9.5]' (4.0/2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   shell weight > 0.182
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   length <= 0.505
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   length <= 0.46: '(8.5-9.5]' (8.0/4.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   length > 0.46
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   length <= 0.485: '(9.5-10.5]' (8.0/5.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   length > 0.485: '(13.5-inf)' (19.0/12.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   length > 0.505: '(9.5-10.5]' (20.0/13.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   sex = F
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   diameter <= 0.325: '(6.5-7.5]' (3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   diameter > 0.325
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   viscera weight <= 0.1105: '(9.5-10.5]' (20.0/15.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   viscera weight > 0.1105
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   shell weight <= 0.2245
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   height <= 0.115: '(8.5-9.5]' (9.0/5.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   height > 0.115
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   height <= 0.165
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   diameter <= 0.415: '(9.5-10.5]' (72.0/56.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   diameter > 0.415: '(7.5-8.5]' (12.0/6.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   height > 0.165: '(10.5-11.5]' (4.0/2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   shell weight > 0.2245: '(11.5-13.5]' (8.0/3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   sex = I
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   whole weight <= 0.6255
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   length <= 0.45: '(11.5-13.5]' (7.0/5.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   length > 0.45
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   shucked weight <= 0.2455
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   height <= 0.115: '(7.5-8.5]' (20.0/10.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   height > 0.115
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   height <= 0.125
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   height <= 0.12: '(7.5-8.5]' (12.0/7.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   height > 0.12
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   shucked weight <= 0.2275: '(7.5-8.5]'
+ (6.0/2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   shucked weight > 0.2275
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   viscera weight <= 0.1185:
+ '(8.5-9.5]' (5.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   viscera weight > 0.1185:
+ '(7.5-8.5]' (3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   height > 0.125
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   diameter <= 0.39
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   diameter <= 0.375
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   diameter <= 0.36: '(8.5-9.5]'
+ (3.0/2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   diameter > 0.36
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   length <= 0.49: '(7.5-8.5]'
+ (2.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   length > 0.49: '(8.5-9.5]'
+ (2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   diameter > 0.375: '(7.5-8.5]' (9.0/5.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   diameter > 0.39
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   diameter <= 0.4: '(8.5-9.5]' (4.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   diameter > 0.4: '(10.5-11.5]' (4.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   shucked weight > 0.2455
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   shell weight <= 0.194: '(7.5-8.5]' (42.0/18.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   shell weight > 0.194: '(8.5-9.5]' (2.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   whole weight > 0.6255
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   shucked weight <= 0.276
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   shucked weight <= 0.2635: '(9.5-10.5]' (3.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   shucked weight > 0.2635
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   length <= 0.535: '(11.5-13.5]' (4.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   length > 0.535: '(8.5-9.5]' (2.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   shucked weight > 0.276
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   height <= 0.135
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   height <= 0.125: '(8.5-9.5]' (6.0/3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   height > 0.125
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   height <= 0.13: '(7.5-8.5]' (5.0/2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   height > 0.13: '(8.5-9.5]' (7.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   height > 0.135
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   length <= 0.55
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   length <= 0.53: '(7.5-8.5]' (6.0/3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   length > 0.53: '(9.5-10.5]' (6.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   length > 0.55: '(8.5-9.5]' (4.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   shucked weight > 0.3345
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   sex = M
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   shell weight <= 0.229: '(8.5-9.5]' (52.0/34.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   shell weight > 0.229: '(7.5-8.5]' (5.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   sex = F
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   diameter <= 0.465
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   height <= 0.165
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   shucked weight <= 0.389
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   viscera weight <= 0.1965: '(8.5-9.5]' (8.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   viscera weight > 0.1965: '(7.5-8.5]' (3.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   shucked weight > 0.389
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   diameter <= 0.425
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   height <= 0.135: '(7.5-8.5]' (7.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   height > 0.135
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   height <= 0.145: '(9.5-10.5]' (3.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   height > 0.145: '(7.5-8.5]' (2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   diameter > 0.425: '(7.5-8.5]' (17.0/9.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   height > 0.165: '(-inf-6.5]' (2.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   diameter > 0.465: '(9.5-10.5]' (2.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   sex = I
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   diameter <= 0.445: '(7.5-8.5]' (25.0/11.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   diameter > 0.445
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   viscera weight <= 0.1755: '(9.5-10.5]' (3.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   viscera weight > 0.1755: '(8.5-9.5]' (2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   shell weight > 0.2335
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   shucked weight <= 0.379
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   length <= 0.53: '(13.5-inf)' (62.0/35.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   length > 0.53
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   viscera weight <= 0.1485
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   whole weight <= 0.7265: '(8.5-9.5]' (4.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   whole weight > 0.7265: '(9.5-10.5]' (12.0/3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   viscera weight > 0.1485
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   viscera weight <= 0.179
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   sex = M
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   length <= 0.56: '(11.5-13.5]' (10.0/2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   length > 0.56
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   height <= 0.15: '(13.5-inf)' (3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   height > 0.15: '(10.5-11.5]' (3.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   sex = F
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   viscera weight <= 0.1625
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   height <= 0.145: '(8.5-9.5]' (3.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   height > 0.145: '(13.5-inf)' (3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   viscera weight > 0.1625
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   whole weight <= 0.8665
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   diameter <= 0.425: '(9.5-10.5]' (2.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   diameter > 0.425
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   whole weight <= 0.84: '(9.5-10.5]'
+ (2.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   whole weight > 0.84: '(11.5-13.5]'
+ (4.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   whole weight > 0.8665: '(13.5-inf)' (2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   sex = I: '(8.5-9.5]' (12.0/8.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   viscera weight > 0.179: '(9.5-10.5]' (56.0/41.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   shucked weight > 0.379
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   shell weight <= 0.239: '(8.5-9.5]' (19.0/6.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   shell weight > 0.239
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   sex = M
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   viscera weight <= 0.286
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   shell weight <= 0.248
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   length <= 0.565: '(8.5-9.5]' (3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   length > 0.565: '(7.5-8.5]' (10.0/4.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   shell weight > 0.248
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   height <= 0.16
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   diameter <= 0.44: '(7.5-8.5]' (13.0/8.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   diameter > 0.44
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   height <= 0.13: '(7.5-8.5]' (4.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   height > 0.13
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   length <= 0.565: '(10.5-11.5]'
+ (4.0/2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   length > 0.565
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   shucked weight <= 0.458
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   shucked weight <= 0.4185:
+ '(9.5-10.5]' (10.0/3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   shucked weight > 0.4185
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   height <= 0.15
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   |   shell weight
+ <= 0.2765: '(8.5-9.5]' (4.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   |   shell weight
+ > 0.2765: '(10.5-11.5]' (2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   height > 0.15: '(10.5-11.5]
+' (3.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   shucked weight > 0.458
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   shucked weight <= 0.4755:
+ '(6.5-7.5]' (3.0/2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   shucked weight > 0.4755
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   whole weight <=
+ 1.189
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   |   diameter <=
+ 0.475: '(8.5-9.5]' (18.0/9.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   |   diameter > 0.475:
+ '(7.5-8.5]' (3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   whole weight > 1.189:
+ '(8.5-9.5]' (5.0/2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   height > 0.16: '(8.5-9.5]' (14.0/6.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   viscera weight > 0.286
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   length <= 0.62: '(9.5-10.5]' (3.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   length > 0.62: '(10.5-11.5]' (2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   sex = F
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   shell weight <= 0.2845
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   viscera weight <= 0.2645
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   whole weight <= 1.0765
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   height <= 0.13: '(10.5-11.5]' (6.0/3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   height > 0.13
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   diameter <= 0.46
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   diameter <= 0.455: '(8.5-9.5]'
+ (24.0/14.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   diameter > 0.455: '(7.5-8.5]' (9.0/4.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   diameter > 0.46
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   height <= 0.16
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   shell weight <= 0.2625: '(10.5-11.5
+]' (3.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   shell weight > 0.2625
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   shucked weight <= 0.4635:
+ '(9.5-10.5]' (4.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   shucked weight > 0.4635:
+ '(10.5-11.5]' (4.0/2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   height > 0.16: '(8.5-9.5]' (3.0/2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   whole weight > 1.0765
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   shucked weight <= 0.534: '(11.5-13.5]'
+ (3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   shucked weight > 0.534: '(7.5-8.5]' (7.0/4.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   viscera weight > 0.2645: '(9.5-10.5]' (4.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   shell weight > 0.2845: '(8.5-9.5]' (16.0/6.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   sex = I: '(8.5-9.5]' (20.0/13.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   shell weight > 0.2895
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   shucked weight <= 0.414
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   length <= 0.495: '(-inf-6.5]' (2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   length > 0.495
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   shell weight <= 0.356
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   length <= 0.57
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   height <= 0.17: '(13.5-inf)' (37.0/17.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   height > 0.17
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   sex = M
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   whole weight <= 0.8855: '(9.5-10.5]' (3.0/2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   whole weight > 0.8855: '(13.5-inf)' (8.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   sex = F: '(13.5-inf)' (4.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   sex = I: '(13.5-inf)' (0.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   length > 0.57: '(13.5-inf)' (50.0/35.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   shell weight > 0.356: '(13.5-inf)' (38.0/9.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   shucked weight > 0.414
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   shell weight <= 0.4095
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   shell weight <= 0.314
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   shell weight <= 0.2905: '(8.5-9.5]' (7.0/2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   shell weight > 0.2905
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   diameter <= 0.44: '(8.5-9.5]' (5.0/2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   diameter > 0.44: '(9.5-10.5]' (91.0/60.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   shell weight > 0.314
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   shucked weight <= 0.5115
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   shell weight <= 0.3775
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   viscera weight <= 0.303
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   shell weight <= 0.32
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   shucked weight <= 0.4995
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   shell weight <= 0.3185
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   length <= 0.605: '(13.5-inf)'
+ (4.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   length > 0.605: '(11.5-13.5]' (8.0/5.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   shell weight > 0.3185: '(11.5-13.5]'
+ (4.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   shucked weight > 0.4995: '(9.5-10.5]' (4.0/2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   shell weight > 0.32
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   shell weight <= 0.3605
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   height <= 0.17
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   shell weight <= 0.3255: '(10.5-11.5]'
+ (7.0/3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   shell weight > 0.3255
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   diameter <= 0.48: '(9.5-10.5]'
+ (14.0/6.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   diameter > 0.48
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   height <= 0.165
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   shell weight <=
+ 0.34: '(13.5-inf)' (8.0/4.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   shell weight > 0.34:
+ '(9.5-10.5]' (19.0/11.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   height > 0.165: '(11.5-13.5]'
+ (6.0/3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   height > 0.17
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   sex = M: '(9.5-10.5]' (4.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   sex = F: '(8.5-9.5]' (11.0/7.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   sex = I: '(9.5-10.5]' (2.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   shell weight > 0.3605: '(9.5-10.5]' (7.0/3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   viscera weight > 0.303: '(13.5-inf)' (5.0/2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   shell weight > 0.3775: '(11.5-13.5]' (10.0/3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   shucked weight > 0.5115
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   shell weight <= 0.3595: '(9.5-10.5]' (111.0/78.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   shell weight > 0.3595
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   shell weight <= 0.36: '(10.5-11.5]' (6.0/2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   shell weight > 0.36
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   sex = M
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   height <= 0.16
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   length <= 0.66: '(8.5-9.5]' (3.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   length > 0.66: '(10.5-11.5]' (3.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   height > 0.16
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   shell weight <= 0.389
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   viscera weight <= 0.22: '(11.5-13.5]'
+ (3.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   viscera weight > 0.22
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   shucked weight <= 0.7425
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   shucked weight <= 0.5455:
+ '(7.5-8.5]' (2.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   shucked weight > 0.5455
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   length <= 0.685
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   |   shell weight
+ <= 0.371: '(9.5-10.5]' (10.0/5.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   |   shell weight
+ > 0.371
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   length <=
+ 0.645: '(9.5-10.5]' (5.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   length >
+ 0.645: '(8.5-9.5]' (6.0/3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   length > 0.685: '(11.5-13.5
+]' (2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   |   |   shucked weight > 0.7425:
+ '(10.5-11.5]' (3.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   shell weight > 0.389: '(10.5-11.5]'
+ (24.0/16.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   sex = F: '(10.5-11.5]' (48.0/33.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   sex = I: '(11.5-13.5]' (2.0/1.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   shell weight > 0.4095
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   shucked weight <= 0.639
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   viscera weight <= 0.324: '(13.5-inf)' (64.0/24.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   viscera weight > 0.324
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   shell weight <= 0.4645
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   shell weight <= 0.4375: '(9.5-10.5]' (9.0/5.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   shell weight > 0.4375: '(11.5-13.5]' (8.0/2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   shell weight > 0.4645: '(13.5-inf)' (17.0/2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   shucked weight > 0.639
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   height <= 0.22
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   shell weight <= 0.4535: '(10.5-11.5]' (48.0/28.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   shell weight > 0.4535
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   shell weight <= 0.5675
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   sex = M
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   length <= 0.665: '(9.5-10.5]' (5.0/3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   length > 0.665
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   height <= 0.205: '(11.5-13.5]' (25.0/13.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   height > 0.205: '(10.5-11.5]' (8.0/2.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   sex = F
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   shucked weight <= 0.7055: '(13.5-inf)'
+ (14.0/7.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   shucked weight > 0.7055
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   height <= 0.18: '(11.5-13.5]' (8.0/5.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   |   |   height > 0.18: '(10.5-11.5]' (23.0/11.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   sex = I: '(10.5-11.5]' (0.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   shell weight > 0.5675
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   shucked weight <= 1.109: '(13.5-inf)' (17.0/7.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   |   |   |   shucked weight > 1.109: '(10.5-11.5]' (3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+|   |   |   |   |   height > 0.22: '(13.5-inf)' (12.0/4.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+Number of Leaves  : 	225
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+Size of the tree : 	440
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+RMS error: 2.2760979789036715
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document
